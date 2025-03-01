@@ -132,6 +132,22 @@
                 </label>
                 <label class="form-control w-full mt-2">
                     <div class="label">
+                        <span class="label-text !text-md font-bold">Scale</span>
+                    </div>
+                    <input
+                        v-model="configStore.advanced.filter.scale"
+                        type="text"
+                        name="scale"
+                        class="input input-sm input-bordered w-full"
+                    />
+                    <div class="label">
+                        <span class="text-sm text-base-content/80">
+                            Default: <span class="select-text cursor-text">scale={}:{} </span></span
+                        >
+                    </div>
+                </label>
+                <label class="form-control w-full mt-2">
+                    <div class="label">
                         <span class="label-text !text-md font-bold">Pad Video</span>
                     </div>
                     <input
@@ -143,7 +159,7 @@
                     <div class="label">
                         <span class="text-sm text-base-content/80">
                             Default:
-                            <span class="select-text cursor-text"> pad='ih*{}/{}:ih:(ow-iw)/2:(oh-ih)/2' </span>
+                            <span class="select-text cursor-text"> pad='{}:{}:-1:-1:color=black' </span>
                         </span>
                     </div>
                 </label>
@@ -160,22 +176,6 @@
                     <div class="label">
                         <span class="text-sm text-base-content/80">
                             Default: <span class="select-text cursor-text">fps={} </span></span
-                        >
-                    </div>
-                </label>
-                <label class="form-control w-full mt-2">
-                    <div class="label">
-                        <span class="label-text !text-md font-bold">Scale</span>
-                    </div>
-                    <input
-                        v-model="configStore.advanced.filter.scale"
-                        type="text"
-                        name="scale"
-                        class="input input-sm input-bordered w-full"
-                    />
-                    <div class="label">
-                        <span class="text-sm text-base-content/80">
-                            Default: <span class="select-text cursor-text">scale={}:{} </span></span
                         >
                     </div>
                 </label>

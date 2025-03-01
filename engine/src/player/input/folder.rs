@@ -41,7 +41,6 @@ impl FolderSource {
             if !storage.is_dir(path).await {
                 error!(target: Target::file_mail(), channel = id; "Path not exists: <b><magenta>{path:?}</></b>");
             }
-
             match storage.walk_dir(path).await {
                 Ok(paths) => {
                     for p in paths {
@@ -72,7 +71,7 @@ impl FolderSource {
         if media_list.is_empty() {
             error!(target: Target::file_mail(), channel = id;
                 "no playable files found under: <b><magenta>{:?}</></b>",
-                path_list
+                path_list // to-do : fix this! that shows the s3 config!
             );
         }
 

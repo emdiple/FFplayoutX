@@ -24,7 +24,7 @@ input_param = ""
 
 [filter]
 deinterlace = "deinterlace_qsv" # yadif=0:-1:0
-pad_video = "" # pad='ih*{}/{}:ih:(ow-iw)/2:(oh-ih)/2'
+pad_video = "" # pad='{}:{}:-1:-1:color=black'
 fps = "vpp_qsv=framerate=25" # fps={}
 scale = "scale_qsv={}:{}" # scale={}:{}
 set_dar = "" # setdar=dar={}
@@ -61,7 +61,7 @@ input_param = ""
 
 [filter]
 deinterlace = "yadif_cuda=0:-1:0" # yadif=0:-1:0
-pad_video = "" # pad='ih*{}/{}:ih:(ow-iw)/2:(oh-ih)/2'
+pad_video = "" # pad='{}:{}:-1:-1:color=black'
 fps = "" # fps={}
 scale = "scale_cuda={}:{}:format=yuv420p" # scale={}:{}
 set_dar = "" # setdar=dar={}

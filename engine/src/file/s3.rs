@@ -318,6 +318,7 @@ impl S3Storage {
     async fn s3_is_object(&self, path: &str) -> Result<bool, ServiceError> {
         let mut is_object = false;
         let (clean_path, parent_path) = s3_path(path)?;
+        let clean_path = clean_path.strip_suffix("/").unwrap_or(&clean_path);
         let delimiter = '/';
         let parent_list_resp = &self
             .client // list of objects and prefix in parent path
@@ -374,11 +375,21 @@ impl Storage for S3Storage {
     }
     /// Returns a sanitized file path by normalizing the root and prefixing with "s3:/{bucket}/".
     fn sanitized_file_path(&self, path: &str) -> String {
+        // if path.starts_with(&self.path_prefix_generator()) { // alternative way to check the input name
+        //     return path.to_string();
+        // }
+        let mut non_prefix_path = path.to_string();
+        while non_prefix_path.starts_with(&self.path_prefix_generator()) {
+            non_prefix_path = non_prefix_path
+                .strip_prefix(&self.path_prefix_generator())
+                .unwrap_or(&non_prefix_path)
+                .to_string();
+        }
         let root = self.original_root.to_string_lossy().to_string();
         let normalized_root = Regex::new(r"/+").unwrap().replace_all(&root, "/");
-        let staged_path = path
+        let staged_path = non_prefix_path
             .strip_prefix(&normalized_root.to_string())
-            .unwrap_or(path)
+            .unwrap_or(&non_prefix_path)
             .to_string();
         let path_prefix = &self.path_prefix_generator();
         format!("{}{}", path_prefix, staged_path) // baked_path
@@ -835,7 +846,7 @@ impl Storage for S3Storage {
         let input = input.as_ref();
         let (cleaned_root_prefix, _) = s3_path(&self.original_root.to_string_lossy())?;
         let validated_file_path = input
-            .strip_prefix(&cleaned_root_prefix)
+            .strip_prefix(cleaned_root_prefix)
             .unwrap_or(input)
             .to_string_lossy();
         let bucket = &self.bucket;
@@ -969,9 +980,9 @@ pub fn s3_path(input_path: &str) -> Result<(String, String), ServiceError> {
         let none_redundant_path = re.replace_all(input_path, "/");
         let clean_path = if !none_redundant_path.is_empty() && none_redundant_path != "/" {
             if input_path.ends_with("/")
-                || Path::new(&none_redundant_path.to_string())
-                    .extension()
-                    .is_some()
+            // || Path::new(&none_redundant_path.to_string())
+            //     .extension()
+            //     .is_some()
             {
                 none_redundant_path.trim_start_matches("/").to_string()
             } else {

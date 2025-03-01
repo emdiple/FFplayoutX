@@ -9,8 +9,8 @@ mod custom;
 pub mod v_drawtext;
 
 use crate::player::{
-    controller::ProcessUnit::{self, *},
-    utils::{calc_aspect, custom_format, fps_calc, fraction, is_close, Media},
+    controller::ProcessUnit::*,
+    utils::{calc_aspect, custom_format, fps_calc, is_close, Media},
 };
 use crate::utils::{
     config::{OutputMode::*, PlayoutConfig},
@@ -39,7 +39,6 @@ const HW_FILTER_POSTFIX: &[&str; 6] = &["_cuda", "_npp", "_opencl", "_vaapi", "_
 
 #[derive(Debug, Clone)]
 pub struct Filters {
-    unit: ProcessUnit,
     hw_context: bool,
     a_chain: Vec<String>,
     v_chain: Vec<String>,
@@ -59,7 +58,7 @@ pub struct Filters {
 }
 
 impl Filters {
-    pub fn new(config: PlayoutConfig, unit: ProcessUnit, audio_position: i32) -> Self {
+    pub fn new(config: PlayoutConfig, audio_position: i32) -> Self {
         let hw = config
             .advanced
             .decoder
@@ -68,7 +67,6 @@ impl Filters {
             .is_some_and(|i| i.contains("-hw"));
 
         Self {
-            unit,
             hw_context: hw,
             a_chain: vec![],
             v_chain: vec![],
@@ -241,22 +239,7 @@ impl Filters {
     }
 
     pub fn map(&mut self) -> Vec<String> {
-        if (!self.output_chain.is_empty() && self.config.processing.override_filter)
-            || (self
-                .config
-                .output
-                .output_cmd
-                .as_ref()
-                .is_some_and(|p| p.iter().filter(|&n| *n == "-map").count() > 1)
-                && self.config.output.mode == HLS)
-            || (self
-                .config
-                .output
-                .output_cmd
-                .as_ref()
-                .is_some_and(|p| p.iter().filter(|&n| *n == "-map").count() > 1)
-                && self.unit == Encoder)
-        {
+        if !self.output_chain.is_empty() && self.config.processing.override_filter {
             return vec![];
         }
 
@@ -286,7 +269,7 @@ impl Filters {
 
 impl Default for Filters {
     fn default() -> Self {
-        Self::new(PlayoutConfig::default(), Decoder, 0)
+        Self::new(PlayoutConfig::default(), 0)
     }
 }
 
@@ -370,20 +353,27 @@ fn deinterlace(config: &PlayoutConfig, chain: &mut Filters, field_order: &Option
     }
 }
 
-fn pad(config: &PlayoutConfig, chain: &mut Filters, aspect: f64) {
-    if !is_close(aspect, config.processing.aspect, 0.03) {
-        let (numerator, denominator) = fraction(config.processing.aspect, 100);
+fn pad(config: &PlayoutConfig, chain: &mut Filters, width: i64, height: i64) {
+    // if !is_close(aspect, config.processing.aspect, 0.03) {
+    //     let (numerator, denominator) = fraction(config.processing.aspect, 100);
 
-        let pad = match config.advanced.filter.pad_video.clone() {
-            Some(pad_video) => custom_format(
-                &pad_video,
-                &[&numerator.to_string(), &denominator.to_string()],
-            ),
-            None => format!("pad='ih*{numerator}/{denominator}:ih:(ow-iw)/2:(oh-ih)/2'"),
-        };
+    //     let pad = match config.advanced.filter.pad_video.clone() {
+    //         Some(pad_video) => custom_format(
+    //             &pad_video,
+    //             &[&numerator.to_string(), &denominator.to_string()],
+    //         ),
+    //         None => format!("pad='ih*{numerator}/{denominator}:ih:(ow-iw)/2:(oh-ih)/2'"),
+    //     };
 
-        chain.add(&pad, 0, Video);
-    }
+    //     chain.add(&pad, 0, Video);
+    // }
+
+    let pad = match config.advanced.filter.pad_video.clone() {
+        Some(pad_video) => custom_format(&pad_video, &[&width.to_string(), &height.to_string()]),
+        None => format!("pad='{}:{}:-1:-1:color=black'", width, height),
+    };
+
+    chain.add(&pad, 0, Video);
 }
 
 fn fps(config: &PlayoutConfig, chain: &mut Filters, fps: f64) {
@@ -647,55 +637,39 @@ pub fn split_filter(config: &PlayoutConfig, chain: &mut Filters, nr: i32, filter
 
 /// Process output filter chain and add new filters to existing ones.
 fn process_output_filters(config: &PlayoutConfig, chain: &mut Filters, output_filter: &str) {
-    let re_v = Regex::new(r"\[[0:]+[v^\[]+([:0]+)?\]").unwrap(); // match video filter input link
-    let re_a = Regex::new(r"\[[0:]+[a^\[]+([:0-9]+)?\]").unwrap(); // match audio filter input link
-    let re_split = Regex::new(r"\[\d+:a(?::\d+)?\]").unwrap(); // match audio selector for split
-    let re_a_out = Regex::new(r"\[aout[0-9]+\];?").unwrap(); // match audio output link
-    let mut v_filter_full = String::new();
-    let mut v_filter = String::new();
-    let mut a_filter_full = String::new();
+    let filter =
+        if (config.text.add_text && !config.text.text_from_filename) || config.output.mode == HLS {
+            let re_v = Regex::new(r"\[[0:]+[v^\[]+([:0]+)?\]").unwrap(); // match video filter input link
+            let _re_a = Regex::new(r"\[[0:]+[a^\[]+([:0]+)?\]").unwrap(); // match audio filter input link
+            let re_a_out = Regex::new(r"\[aout[0-9]+\];?").unwrap(); // match audio output link
+            let mut o_filter = output_filter.to_string();
 
-    if let Some(mat) = re_split.find(output_filter) {
-        let split_index = mat.start();
-        let (v_part, a_part) = output_filter.split_at(split_index);
-        v_filter_full = v_part.trim_end_matches(';').to_string();
-        a_filter_full = a_part.to_string();
-        v_filter = re_v.replace(&v_filter_full, "").to_string();
-    } else if !output_filter.is_empty() {
-        v_filter_full = output_filter.to_string();
-        v_filter = re_v.replace(&v_filter_full, "").to_string();
-    }
+            if let Some(first) = chain.v_chain.first() {
+                o_filter = re_v.replace(&o_filter, &format!("{},", first)).to_string();
+            }
 
-    if let Some(last) = chain.v_chain.last_mut() {
-        *last = format!("{last},{v_filter}");
-    } else {
-        chain.v_chain.push(v_filter_full);
-    }
+            if !chain.a_chain.is_empty() {
+                let audio_split = chain
+                    .a_chain
+                    .iter()
+                    .filter(|f| f.contains("0:a") || f.contains("1:a"))
+                    .map(|p| re_a_out.replace(p, "").to_string())
+                    .collect::<Vec<String>>();
 
-    if chain.a_chain.is_empty() && !a_filter_full.is_empty() {
-        chain.a_chain.push(a_filter_full);
-    } else if !chain.a_chain.is_empty() {
-        // find multiple audio tracks and split them
-        // ["[0:a:0]anull", "[aout0];[0:a:1]anull"] become: ["[0:a:0]anull", "[0:a:1]anull"]
-        let audio_split = chain
-            .a_chain
-            .iter()
-            .filter(|f| re_a.find(f).is_some())
-            .map(|p| re_a_out.replace(p, "").to_string())
-            .collect::<Vec<String>>();
+                for i in 0..config.processing.audio_tracks {
+                    o_filter = o_filter.replace(
+                        &format!("[0:a:{i}]"),
+                        &format!("{},", &audio_split[i as usize]),
+                    );
+                }
+            }
 
-        // replace output output filter with mixed ones from audio_split
-        // [0:a:0]asplit=2[a_0_1][a_0_2];[0:a:1]asplit=2[a_1_1][a_1_2] become:
-        // [0:a:0]anull,asplit=2[a_0_1][a_0_2];[0:a:1]anull,asplit=2[a_1_1][a_1_2]
-        for i in 0..config.processing.audio_tracks {
-            a_filter_full = a_filter_full.replace(
-                &format!("[0:a:{i}]"),
-                &format!("{},", &audio_split[i as usize]),
-            );
-        }
+            o_filter
+        } else {
+            output_filter.to_string()
+        };
 
-        chain.a_chain = vec![a_filter_full];
-    }
+    chain.output_chain = vec_strings!["-filter_complex", filter];
 }
 
 fn custom(filter: &str, chain: &mut Filters, nr: i32, filter_type: FilterType) {
@@ -709,7 +683,7 @@ pub async fn filter_chains(
     node: &mut Media,
     filter_chain: &Option<Arc<Mutex<Vec<String>>>>,
 ) -> Filters {
-    let mut filters = Filters::new(config.clone(), node.unit, 0);
+    let mut filters = Filters::new(config.clone(), 0);
 
     if config.processing.override_filter {
         //override hole filtering
@@ -753,9 +727,15 @@ pub async fn filter_chains(
                 let frame_per_sec = fps_calc(&v_stream.frame_rate, 1.0);
 
                 deinterlace(config, &mut filters, &v_stream.field_order);
-                pad(config, &mut filters, aspect);
-                fps(config, &mut filters, frame_per_sec);
                 scale(config, &mut filters, v_stream.width, v_stream.height);
+                pad(
+                    config,
+                    &mut filters,
+                    config.processing.width,
+                    config.processing.height,
+                );
+                fps(config, &mut filters, frame_per_sec);
+                // scale(config, &mut filters, v_stream.width, v_stream.height);
                 setdar(config, &mut filters, aspect);
             }
 

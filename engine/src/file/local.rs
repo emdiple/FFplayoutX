@@ -77,8 +77,18 @@ impl Storage for LocalStorage {
     }
     /// Returns a sanitized file path by normalizing the root and prefixing with "local:".
     fn sanitized_file_path(&self, path: &str) -> String {
+        let mut non_prefix_path = path.to_string();
+        while non_prefix_path.starts_with(&self.path_prefix_generator()) {
+            non_prefix_path = non_prefix_path
+                .strip_prefix(&self.path_prefix_generator())
+                .unwrap_or(&non_prefix_path)
+                .to_string();
+        }
         let root = self.root.to_string_lossy().to_string();
-        let staged_path = path.strip_prefix(&root).unwrap_or(path).to_string();
+        let staged_path = non_prefix_path
+            .strip_prefix(&root)
+            .unwrap_or(&non_prefix_path)
+            .to_string();
         let path_prefix = self.path_prefix_generator();
         format!("{}{}", path_prefix, staged_path) // baked path
     }

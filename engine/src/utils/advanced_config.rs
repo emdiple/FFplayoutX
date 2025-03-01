@@ -243,7 +243,8 @@ impl AdvancedConfig {
                             "deinterlace" => item.decor_mut().set_suffix(" # yadif=0:-1:0"),
                             "pad_video" => item
                                 .decor_mut()
-                                .set_suffix(" # pad='ih*{}/{}:ih:(ow-iw)/2:(oh-ih)/2'"),
+                                // .set_suffix(" # pad='ih*{}/{}:ih:(ow-iw)/2:(oh-ih)/2'"),
+                                .set_suffix(" # pad='{}:{}:-1:-1:color=black'"),
                             "fps" => item.decor_mut().set_suffix(" # fps={}"),
                             "scale" => item.decor_mut().set_suffix(" # scale={}:{}"),
                             "set_dar" => item.decor_mut().set_suffix(" # setdar=dar={}"),
