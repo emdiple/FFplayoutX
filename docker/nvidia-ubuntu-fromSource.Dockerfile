@@ -1048,7 +1048,7 @@ WORKDIR /app
 
 # install npm and cargo, then build project
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y && \
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash && \
+    PROFILE=/dev/null curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash && \
     source $HOME/.nvm/nvm.sh && \
     nvm install 18 && \
     source $HOME/.profile && \
