@@ -184,3 +184,6 @@ Create docker image 4 sabaIdea use
 `docker run --rm -it --name ffplayout -p 8787:8787 nvidia-ubuntu-ffplayout:s0.24.0`
 
 `docker run --rm -it --name ffplayout -p 8787:8787 -v /home/mysamimi/ffmedia/db:/db -v /home/mysamimi/ffmedia/media:/tv-media -v /home/mysamimi/ffmedia/playlists:/playlists -v /home/mysamimi/ffmedia/log:/logging -v /home/mysamimi/ffmedia/public:/public nvidia-ubuntu-ffplayout:s0.24.0`
+
+# run in mordor
+`docker run --rm -it --name ffplayout-test -p 8780:8787 -v /app/ffplayout/test/db:/db -v /app/ffplayout/test/tv-media:/tv-media -v /app/ffplayout/test/playlists:/playlists -v /app/ffplayout/test/logging:/logging -v /app/ffplayout/test/public:/public docker-registry.saba-e.com/giantplaytoys/nvidia-ubuntu-ffplayout:v0.24.0`
