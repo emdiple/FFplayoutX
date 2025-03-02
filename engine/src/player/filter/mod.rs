@@ -402,7 +402,7 @@ fn scale(config: &PlayoutConfig, chain: &mut Filters, width: Option<i64>, height
     {
         chain.add(
             &format!(
-                "scale={}:{}",
+                "scale={}:{}:force_original_aspect_ratio=decrease:eval=frame",
                 config.processing.width, config.processing.height
             ),
             0,

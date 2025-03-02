@@ -352,6 +352,7 @@ impl CurrentProgram {
             .push(self.current_node.clone());
 
         self.current_node.last_ad = self.last_node_ad;
+
         self.current_node
             .add_filter(&self.config, &self.manager.filter_chain)
             .await;
@@ -584,7 +585,6 @@ impl CurrentProgram {
                 .await
                 && !fillers.is_empty()
             {
-
                 let mut index = self.manager.filler_index.fetch_add(1, Ordering::SeqCst);
 
                 if index > fillers.len() - 1 {
@@ -696,7 +696,7 @@ impl CurrentProgram {
 
         trace!(
             "return gen_source: {}, seek: {}, out: {}",
-            node.source,
+            node.key,
             node.seek,
             node.out,
         );

@@ -142,7 +142,7 @@
                     />
                     <div class="label">
                         <span class="text-sm text-base-content/80">
-                            Default: <span class="select-text cursor-text">scale={}:{} </span></span
+                            Default: <span class="select-text cursor-text">scale={}:{}:force_original_aspect_ratio=decrease:eval=frame </span></span
                         >
                     </div>
                 </label>

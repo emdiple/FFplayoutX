@@ -26,7 +26,7 @@ input_param = ""
 deinterlace = "deinterlace_qsv" # yadif=0:-1:0
 pad_video = "" # pad='{}:{}:-1:-1:color=black'
 fps = "vpp_qsv=framerate=25" # fps={}
-scale = "scale_qsv={}:{}" # scale={}:{}
+scale = "scale_qsv={}:{}:force_original_aspect_ratio=decrease:eval=frame" # scale={}:{}:force_original_aspect_ratio=decrease:eval=frame
 set_dar = "" # setdar=dar={}
 fade_in = "" # fade=in:st=0:d=0.5
 fade_out = "" # fade=out:st={}:d=1.0
@@ -63,7 +63,7 @@ input_param = ""
 deinterlace = "yadif_cuda=0:-1:0" # yadif=0:-1:0
 pad_video = "" # pad='{}:{}:-1:-1:color=black'
 fps = "" # fps={}
-scale = "scale_cuda={}:{}:format=yuv420p" # scale={}:{}
+scale = "scale_cuda={}:{}:format=yuv420p" # scale={}:{}:force_original_aspect_ratio=decrease:eval=frame
 set_dar = "" # setdar=dar={}
 fade_in = "" # fade=in:st=0:d=0.5
 fade_out = "" # fade=out:st={}:d=1.0

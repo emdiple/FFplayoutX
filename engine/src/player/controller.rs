@@ -165,7 +165,6 @@ impl ChannelManager {
         let channel_id = self.channel.lock().await.id;
 
         handles::update_player(&self.db_pool, channel_id, true).await?;
-
         tokio::spawn(async move {
             const MAX_DELAY: Duration = Duration::from_secs(180);
             let mut elapsed = Duration::from_secs(5);

@@ -14,7 +14,7 @@ mod stream;
 use crate::player::{
     controller::{ChannelManager, ProcessUnit::*},
     input::{ingest_server, source_generator},
-    utils::{sec_to_time, stderr_reader},
+    utils::{is_remote, sec_to_time, stderr_reader},
 };
 use crate::utils::{
     config::OutputMode::*,
@@ -76,7 +76,7 @@ async fn play(
         info!(target: Target::file_mail(), channel = id;
             "Play for <yellow>{}</>{c_index}: <b><magenta>{}  {}</></b>",
             sec_to_time(node.out - node.seek),
-            node.source,
+            node.key,
             node.audio
         );
 
@@ -96,7 +96,9 @@ async fn play(
         let mut dec_cmd = vec_strings!["-hide_banner", "-nostats", "-v", &ff_log_format];
 
         if let Some(decoder_input_cmd) = &config.advanced.decoder.input_cmd {
-            dec_cmd.append(&mut decoder_input_cmd.clone());
+            if is_remote(&node.source) {
+                dec_cmd.append(&mut decoder_input_cmd.clone());
+            }
         }
 
         dec_cmd.append(&mut cmd);
@@ -255,7 +257,6 @@ pub async fn player(manager: ChannelManager) -> Result<(), ServiceError> {
             result?;
         }
     }
-
     trace!("Out of source loop");
 
     Ok(())

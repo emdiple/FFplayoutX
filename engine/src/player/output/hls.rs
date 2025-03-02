@@ -25,8 +25,11 @@ use tokio::{
     process::Command,
 };
 
-use crate::utils::{logging::log_line, task_runner};
 use crate::vec_strings;
+use crate::{
+    player::utils::is_remote,
+    utils::{logging::log_line, task_runner},
+};
 use crate::{
     player::{
         controller::{ChannelManager, ProcessUnit::*},
@@ -218,7 +221,9 @@ async fn write(manager: &ChannelManager, ff_log_format: &str) -> Result<(), Serv
         let mut dec_prefix = vec_strings!["-hide_banner", "-nostats", "-v", &ff_log_format];
 
         if let Some(decoder_input_cmd) = &config.advanced.decoder.input_cmd {
-            dec_prefix.append(&mut decoder_input_cmd.clone());
+            if is_remote(&node.source) {
+                dec_prefix.append(&mut decoder_input_cmd.clone());
+            }
         }
 
         let mut read_rate = 1.0;
@@ -273,7 +278,6 @@ async fn write(manager: &ChannelManager, ff_log_format: &str) -> Result<(), Serv
 /// Write with single ffmpeg instance directly to a HLS playlist.
 pub async fn writer(manager: &ChannelManager, ff_log_format: &str) -> Result<(), ServiceError> {
     let config = manager.config.lock().await.clone();
-
     let manager2 = manager.clone();
 
     let handle_ingest = if config.ingest.enable {

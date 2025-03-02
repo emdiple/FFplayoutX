@@ -44,6 +44,10 @@ async fn check_media(
     let mut config = config.clone();
     config.output.mode = Null;
 
+    if !is_remote(&node.source) {
+        config.advanced.decoder.input_cmd = None;
+    }
+
     let mut process_length = 0.1;
 
     if let Some(decoder_input_cmd) = &config.advanced.decoder.input_cmd {

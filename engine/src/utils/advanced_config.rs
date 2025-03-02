@@ -246,7 +246,9 @@ impl AdvancedConfig {
                                 // .set_suffix(" # pad='ih*{}/{}:ih:(ow-iw)/2:(oh-ih)/2'"),
                                 .set_suffix(" # pad='{}:{}:-1:-1:color=black'"),
                             "fps" => item.decor_mut().set_suffix(" # fps={}"),
-                            "scale" => item.decor_mut().set_suffix(" # scale={}:{}"),
+                            "scale" => item.decor_mut().set_suffix(
+                                " # scale={}:{}:force_original_aspect_ratio=decrease:eval=frame",
+                            ),
                             "set_dar" => item.decor_mut().set_suffix(" # setdar=dar={}"),
                             "fade_in" => item.decor_mut().set_suffix(" # fade=in:st=0:d=0.5"),
                             "fade_out" => item.decor_mut().set_suffix(" # fade=out:st={}:d=1.0"),
