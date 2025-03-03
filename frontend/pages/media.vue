@@ -456,7 +456,6 @@ function setPreviewData(path: string) {
     /*
         Set path and player options for video preview.
     */
-    console.log(path) // DEBUG
     let fullPath = path
     if (!path.includes('/')) {
         fullPath = `/${mediaStore.folderTree.parent}/${mediaStore.folderTree.source}/${path}`.replace(/\/[/]+/g, '/')

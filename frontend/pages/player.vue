@@ -346,6 +346,11 @@ function closePlayer() {
 }
 
 function setPreviewData(path: string) {
+    const indicatorMatch = path.match(/^\[(.*?):\]/);
+    if (indicatorMatch) {
+        path = path.replace(indicatorMatch[0], ''); // Remove the indicator completely
+    }
+
     let fullPath = path
     const storagePath = configStore.channels[configStore.i].storage
     const lastIndex = storagePath.lastIndexOf('/')
@@ -353,7 +358,7 @@ function setPreviewData(path: string) {
     if (!path.includes('/')) {
         const parent = mediaStore.folderTree.parent ? mediaStore.folderTree.parent : ''
         fullPath = `/${parent}/${mediaStore.folderTree.source}/${path}`.replace(/\/[/]+/g, '/')
-    } else if (lastIndex !== -1) {
+    } else if (lastIndex !== -1 && !indicatorMatch) {
         fullPath = path.replace(storagePath.substring(0, lastIndex), '')
     }
 
@@ -396,7 +401,10 @@ function setPreviewData(path: string) {
     } else {
         isVideo.value = false
     }
+
+
 }
+
 
 function splitClip() {
     splitTimes.value = []
