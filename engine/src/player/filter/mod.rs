@@ -6,6 +6,7 @@ use shlex::split;
 use tokio::sync::Mutex;
 
 mod custom;
+pub mod enhanced_overlay;
 pub mod v_drawtext;
 
 use crate::player::{
@@ -17,6 +18,7 @@ use crate::utils::{
     logging::Target,
 };
 use crate::vec_strings;
+use enhanced_overlay::enhanced_overlay;
 
 #[derive(Clone, Debug, Copy, Eq, PartialEq)]
 pub enum FilterType {
@@ -354,20 +356,6 @@ fn deinterlace(config: &PlayoutConfig, chain: &mut Filters, field_order: &Option
 }
 
 fn pad(config: &PlayoutConfig, chain: &mut Filters, width: i64, height: i64) {
-    // if !is_close(aspect, config.processing.aspect, 0.03) {
-    //     let (numerator, denominator) = fraction(config.processing.aspect, 100);
-
-    //     let pad = match config.advanced.filter.pad_video.clone() {
-    //         Some(pad_video) => custom_format(
-    //             &pad_video,
-    //             &[&numerator.to_string(), &denominator.to_string()],
-    //         ),
-    //         None => format!("pad='ih*{numerator}/{denominator}:ih:(ow-iw)/2:(oh-ih)/2'"),
-    //     };
-
-    //     chain.add(&pad, 0, Video);
-    // }
-
     let pad = match config.advanced.filter.pad_video.clone() {
         Some(pad_video) => custom_format(&pad_video, &[&width.to_string(), &height.to_string()]),
         None => format!("pad='{}:{}:-1:-1:color=black'", width, height),
@@ -748,6 +736,7 @@ pub async fn filter_chains(
         add_text(config, &mut filters, node, filter_chain).await;
         fade(config, &mut filters, node, 0, Video);
         overlay(config, &mut filters, node);
+        enhanced_overlay(&mut filters, node);
     }
 
     let (proc_vf, proc_af) = if node.unit == Ingest {

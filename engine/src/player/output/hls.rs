@@ -252,6 +252,8 @@ async fn write(manager: &ChannelManager, ff_log_format: &str) -> Result<(), Serv
             fmt_cmd(&dec_cmd)
         );
 
+        // println!("dec_cmd: {:?}", &dec_cmd); // DEBUG
+
         let mut dec_proc = Command::new("ffmpeg")
             .args(dec_cmd)
             .kill_on_drop(true)

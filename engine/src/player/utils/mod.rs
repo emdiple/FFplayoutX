@@ -47,6 +47,8 @@ pub use json_serializer::{read_json, JsonPlaylist};
 
 use crate::vec_strings;
 
+use super::filter::enhanced_overlay::Overlay;
+
 /// Compare incoming stream name with expecting name, but ignore question mark.
 pub fn valid_stream(msg: &str) -> bool {
     if let Some((unexpected, expected)) = msg.split_once(',') {
@@ -236,6 +238,9 @@ pub struct Media {
     #[serde(default, skip_serializing_if = "is_empty_string")]
     pub custom_filter: String,
 
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enhanced_overlay: Option<Vec<Overlay>>,
+
     #[serde(skip_serializing, skip_deserializing)]
     pub probe: Option<MediaProbe>,
 
@@ -283,6 +288,7 @@ impl Media {
             cmd: Some(vec_strings!["-i", src]),
             filter: None,
             custom_filter: String::new(),
+            enhanced_overlay: Some(Vec::new()),
             probe,
             probe_audio: None,
             last_ad: false,
@@ -363,6 +369,7 @@ impl Default for Media {
             cmd: Some(vec_strings!["-i", String::new()]),
             filter: None,
             custom_filter: String::new(),
+            enhanced_overlay: Some(Vec::new()),
             probe: None,
             probe_audio: None,
             last_ad: false,
@@ -383,6 +390,7 @@ impl PartialEq for Media {
             && self.category == other.category
             && self.audio == other.audio
             && self.custom_filter == other.custom_filter
+            && self.enhanced_overlay == other.enhanced_overlay
     }
 }
 
