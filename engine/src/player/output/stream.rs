@@ -27,10 +27,6 @@ pub async fn output(config: &PlayoutConfig, log_format: &str) -> Result<Child, S
         ..Default::default()
     };
 
-    // if is_remote(&media.source) {
-    //     config.advanced.decoder.input_cmd = None;
-    //     config.advanced.decoder.input_param = None;
-    // }
     media.add_filter(config, &None).await;
 
     if let Some(input_cmd) = &config.advanced.encoder.input_cmd {
