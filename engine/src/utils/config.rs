@@ -192,6 +192,8 @@ pub struct Channel {
     pub logs: PathBuf,
     pub public: PathBuf,
     pub playlists: PathBuf,
+    pub advendor_base_url: String,
+    pub is_advendor_nownext: bool,
     pub storage: PathBuf,
     pub shared: bool,
     #[ts(type = "string")]
@@ -204,6 +206,8 @@ impl Channel {
             logs: PathBuf::from(config.logs.clone()),
             public: PathBuf::from(channel.public.clone()),
             playlists: PathBuf::from(channel.playlists.clone()),
+            advendor_base_url: channel.advendor_base_url.clone(),
+            is_advendor_nownext: channel.is_advendor_nownext,
             storage: PathBuf::from(channel.storage.clone()),
             shared: config.shared,
             timezone: channel.timezone,
