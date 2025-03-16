@@ -443,6 +443,7 @@ async fn patch_channel(
 
         data.public = channel.public;
         data.playlists = channel.playlists;
+        data.advendor_base_url = channel.advendor_base_url;
         data.storage = channel.storage;
     }
 
@@ -1170,12 +1171,49 @@ pub async fn save_playlist(
         .ok_or(ServiceError::BadRequest("Channel not found".to_string()))?;
     let config = manager.config.lock().await.clone();
     let storage = manager.storage.lock().await.clone();
+    let channel = config.channel.clone();
 
     let mut data = data.into_inner();
     for media in &mut data.program {
         let cloned_media_source = media.source.clone();
         media.source = storage.sanitized_file_path(&cloned_media_source);
     }
+
+    data = match channel.advendor_base_url.is_empty() || !channel.is_advendor_nownext {
+        true => data,
+        false => {
+            let endpoint = if channel.advendor_base_url.is_empty() {
+                return Err(ServiceError::BadRequest(
+                    "Advendor endpoint is empty".to_string(),
+                ));
+            } else if !channel.advendor_base_url.starts_with("http://")
+                && !channel.advendor_base_url.starts_with("https://")
+            {
+                format!("http://{}", channel.advendor_base_url)
+            } else {
+                channel.advendor_base_url
+            };
+
+            let client = reqwest::Client::new();
+            let nownext_response = client
+                .post(endpoint)
+                .json(&data)
+                .send()
+                .await
+                .map_err(|e| ServiceError::BadRequest(format!("Failed to fetch nownext: {}", e)))?;
+
+            if !nownext_response.status().is_success() {
+                return Err(ServiceError::BadRequest(format!(
+                    "Nownext service returned error: {}",
+                    nownext_response.status()
+                )));
+            }
+
+            nownext_response.json().await.map_err(|e| {
+                ServiceError::BadRequest(format!("Failed to parse nownext response: {}", e))
+            })?
+        }
+    };
 
     match write_playlist(&config, data).await {
         Ok(res) => Ok(web::Json(res)),
