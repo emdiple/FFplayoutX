@@ -65,8 +65,7 @@ pub struct Channel {
     pub playlists: String,
     pub advendor_base_url: String,
     pub is_advendor_nownext: bool,
-    // #[serde(default)]
-    // pub advendor_nownext_route: Option<String>,
+    pub advendor_nownext_route: String,
     pub storage: String,
     pub last_date: Option<String>,
     pub time_shift: f64,
@@ -103,7 +102,7 @@ impl FromRow<'_, SqliteRow> for Channel {
             playlists: row.try_get("playlists").unwrap_or_default(),
             advendor_base_url: row.try_get("advendor_base_url").unwrap_or_default(),
             is_advendor_nownext: row.try_get("is_advendor_nownext").unwrap_or_default(),
-            // advendor_nownext_route: row.try_get("advendor_nownext_route").unwrap_or_default(),
+            advendor_nownext_route: row.try_get("advendor_nownext_route").unwrap_or_default(),
             storage: row.try_get("storage").unwrap_or_default(),
             last_date: row.try_get("last_date").unwrap_or_default(),
             time_shift: row.try_get("time_shift").unwrap_or_default(),

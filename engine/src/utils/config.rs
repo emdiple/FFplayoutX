@@ -194,6 +194,7 @@ pub struct Channel {
     pub playlists: PathBuf,
     pub advendor_base_url: String,
     pub is_advendor_nownext: bool,
+    pub advendor_nownext_route: String,
     pub storage: PathBuf,
     pub shared: bool,
     #[ts(type = "string")]
@@ -208,6 +209,7 @@ impl Channel {
             playlists: PathBuf::from(channel.playlists.clone()),
             advendor_base_url: channel.advendor_base_url.clone(),
             is_advendor_nownext: channel.is_advendor_nownext,
+            advendor_nownext_route: channel.advendor_nownext_route.clone(),
             storage: PathBuf::from(channel.storage.clone()),
             shared: config.shared,
             timezone: channel.timezone,

@@ -1179,40 +1179,51 @@ pub async fn save_playlist(
         media.source = storage.sanitized_file_path(&cloned_media_source);
     }
 
-    data = match channel.advendor_base_url.is_empty() || !channel.is_advendor_nownext {
-        true => data,
-        false => {
-            let endpoint = if channel.advendor_base_url.is_empty() {
-                return Err(ServiceError::BadRequest(
-                    "Advendor endpoint is empty".to_string(),
-                ));
-            } else if !channel.advendor_base_url.starts_with("http://")
-                && !channel.advendor_base_url.starts_with("https://")
-            {
-                format!("http://{}", channel.advendor_base_url)
-            } else {
-                channel.advendor_base_url
-            };
+    data = if channel.advendor_base_url.is_empty() || !channel.is_advendor_nownext {
+        data
+    } else if !channel.advendor_nownext_route.is_empty() {
+        let base_url = if channel.advendor_base_url.is_empty() {
+            return Err(ServiceError::BadRequest(
+                "Advendor endpoint is empty".to_string(),
+            ));
+        } else if !channel.advendor_base_url.starts_with("http://")
+            && !channel.advendor_base_url.starts_with("https://")
+        {
+            format!("http://{}", channel.advendor_base_url)
+        } else {
+            channel.advendor_base_url.clone()
+        };
 
-            let client = reqwest::Client::new();
-            let nownext_response = client
-                .post(endpoint)
-                .json(&data)
-                .send()
-                .await
-                .map_err(|e| ServiceError::BadRequest(format!("Failed to fetch nownext: {}", e)))?;
+        let endpoint_url = format!(
+            "{}/{}",
+            base_url.trim_end_matches('/'),
+            channel.advendor_nownext_route.trim_start_matches('/')
+        );
 
-            if !nownext_response.status().is_success() {
-                return Err(ServiceError::BadRequest(format!(
-                    "Nownext service returned error: {}",
-                    nownext_response.status()
-                )));
-            }
+        let client = reqwest::Client::new();
+        let nownext_response = client
+            .post(&endpoint_url)
+            .json(&data)
+            .send()
+            .await
+            .map_err(|e| {
+                ServiceError::BadRequest(format!("Failed to send nownext request: {}", e))
+            })?;
 
-            nownext_response.json().await.map_err(|e| {
-                ServiceError::BadRequest(format!("Failed to parse nownext response: {}", e))
-            })?
+        if !nownext_response.status().is_success() {
+            return Err(ServiceError::BadRequest(format!(
+                "Nownext service returned error: HTTP {}",
+                nownext_response.status()
+            )));
         }
+
+        nownext_response.json().await.map_err(|e| {
+            ServiceError::BadRequest(format!("Failed to parse nownext response: {}", e))
+        })?
+    } else {
+        return Err(ServiceError::BadRequest(
+            "Nownext route should not be empty".to_string(),
+        ));
     };
 
     match write_playlist(&config, data).await {

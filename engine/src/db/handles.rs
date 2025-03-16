@@ -96,7 +96,7 @@ pub async fn select_related_channels(
     let query = match user_id {
         Some(id) => format!(
             "SELECT c.id, c.name, c.preview_url, c.extra_extensions, c.active, c.public, c.playlists, c.advendor_base_url,
-            c.is_advendor_nownext, c.storage, c.last_date, c.time_shift, c.timezone, c.advanced_id FROM channels c
+            c.is_advendor_nownext, c.advendor_nownext_route, c.storage, c.last_date, c.time_shift, c.timezone, c.advanced_id FROM channels c
                 left join user_channels uc on uc.channel_id = c.id
                 left join user u on u.id = uc.user_id
              WHERE u.id = {id} ORDER BY c.id ASC;"
@@ -131,7 +131,7 @@ pub async fn update_channel(
     channel: Channel,
 ) -> Result<SqliteQueryResult, ProcessError> {
     const QUERY: &str =
-        "UPDATE channels SET name = $2, preview_url = $3, extra_extensions = $4, public = $5, playlists = $6, advendor_base_url = $7, is_advendor_nownext = $8, storage = $9, timezone = $10 WHERE id = $1";
+        "UPDATE channels SET name = $2, preview_url = $3, extra_extensions = $4, public = $5, playlists = $6, advendor_base_url = $7, is_advendor_nownext = $8, advendor_nownext_route = $9, storage = $10, timezone = $11 WHERE id = $1";
     let result = sqlx::query(QUERY)
         .bind(id)
         .bind(channel.name)
@@ -141,6 +141,7 @@ pub async fn update_channel(
         .bind(channel.playlists)
         .bind(channel.advendor_base_url)
         .bind(channel.is_advendor_nownext)
+        .bind(channel.advendor_nownext_route)
         .bind(channel.storage)
         .bind(channel.timezone.map(|tz| tz.to_string()))
         .execute(conn)
@@ -191,7 +192,7 @@ pub async fn insert_channel(
     conn: &Pool<Sqlite>,
     channel: Channel,
 ) -> Result<Channel, ProcessError> {
-    const QUERY: &str = "INSERT INTO channels (name, preview_url, extra_extensions, public, playlists, advendor_base_url, is_advendor_nownext, storage) VALUES($1, $2, $3, $4, $5, $6, $7, $8)";
+    const QUERY: &str = "INSERT INTO channels (name, preview_url, extra_extensions, public, playlists, advendor_base_url, is_advendor_nownext , advendor_nownext_route, storage) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)";
     let result = sqlx::query(QUERY)
         .bind(channel.name)
         .bind(channel.preview_url)
@@ -200,6 +201,7 @@ pub async fn insert_channel(
         .bind(channel.playlists)
         .bind(channel.advendor_base_url)
         .bind(channel.is_advendor_nownext)
+        .bind(channel.advendor_nownext_route)
         .bind(channel.storage)
         .execute(conn)
         .await?;

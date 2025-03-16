@@ -232,6 +232,7 @@ export default {
         playlistPath: 'Playlist Path',
         advendorBaseUrl: 'Adendor Endpunkt',
         isAdvendorNowNext: '"Now_Next" aktivieren',
+        advendorNowNextRoute: "Route",
         storagePath: 'Storage Path',
         sharedStorage: 'ffplayout работает внутри контейнера, используйте один и тот же корень хранилища для всех каналов!',
         timezone: 'Timezone',

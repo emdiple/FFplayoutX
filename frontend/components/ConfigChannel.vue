@@ -109,32 +109,32 @@
                     />
                 </label>
 
-                <label class="form-control w-full mt-1">
-                    <div v-if="channel.advendor_base_url" class="label cursor-pointer flex gap-2 justify-start">
-                        <span class="label-text">{{ t('config.isAdvendorNowNext') }}</span>
-                        <input
-                            v-model="channel.is_advendor_nownext"
-                            type="checkbox"
-                            class="checkbox scale-75"
-                            :checked="channel.is_advendor_nownext || false"
-                            @change="isChanged"
-                        />
+                <div v-if="channel.advendor_base_url" class="flex items-center gap-4 mt-3 ml-4">
+                    <div class="flex items-center gap-4 w-full">
+                        <span class="label-text whitespace-nowrap">{{ t('config.isAdvendorNowNext') }}</span>
+                        <label class="form-control flex items-center gap-2">
+                            <input
+                                v-model="channel.is_advendor_nownext"
+                                type="checkbox"
+                                class="checkbox checkbox-sm"
+                                :checked="channel.is_advendor_nownext || false"
+                                @change="isChanged"
+                            />
+                        </label>
+                        <label v-if="channel.is_advendor_nownext" class="form-control flex-1">
+                            <div class="label">
+                                <span class="label-text ml-10">{{ t('config.advendorNowNextRoute') }}</span>
+                                <input
+                                    v-model="channel.advendor_nownext_route"
+                                    type="text"
+                                    name="advendor_nownext_route"
+                                    class="input input-bordered w-full input-sm ml-4"
+                                    @keyup="isChanged"
+                                />
+                            </div>
+                        </label>
                     </div>
-                </label>
-
-                <!-- <label class="form-control w-1/2 mt-1">
-                    <div v-if="channel.advendor_base_url" class="label">
-                        <span class="label-text">{{ t('config.advendorNowNextUrl') }}</span>
-                    </div>
-                    <input
-                        v-if="channel.advendor_base_url"
-                        v-model="channel.advendor_base_url"
-                        type="text"
-                        name="advendor_nownext_url"
-                        class="input input-bordered w-full"
-                        @keyup="isChanged"
-                    />
-                </label> -->
+                </div>
 
                 <label class="form-control w-full mt-6">
                     <div class="label">
