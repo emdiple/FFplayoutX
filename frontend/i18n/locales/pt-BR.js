@@ -229,6 +229,8 @@ export default {
         noPlayoutConfig: 'Nenhuma configuração de playout encontrada!',
         publicPath: 'Public (HLS) Path',
         playlistPath: 'Playlist Path',
+        advendorBaseUrl: 'Ponto final Advendor',
+        isAdvendorNowNext: '"Agora_Próximo" Recurso',
         storagePath: 'Storage Path',
         sharedStorage: 'O ffplayout é executado dentro de um contêiner; use a mesma raiz de armazenamento para todos os canais!',
         timezone: 'Timezone',

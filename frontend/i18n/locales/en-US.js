@@ -230,6 +230,8 @@ export default {
         noPlayoutConfig: 'No playout config found!',
         publicPath: 'Public (HLS) Path',
         playlistPath: 'Playlist Path',
+        advendorBaseUrl: 'Advendor Endpoint',
+        isAdvendorNowNext: '"Now_Next" Feature',
         storagePath: 'Storage Path',
         sharedStorage: 'ffplayout runs inside a container, use the same storage root for all channels!',
         timezone: 'Timezone',

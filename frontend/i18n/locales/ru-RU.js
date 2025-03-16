@@ -230,6 +230,8 @@ export default {
         noPlayoutConfig: 'Конфигурация воспроизведения не найдена!',
         publicPath: 'Public (HLS) Path',
         playlistPath: 'Playlist Path',
+        advendorBaseUrl: 'Adendor Endpunkt',
+        isAdvendorNowNext: '"Now_Next" aktivieren',
         storagePath: 'Storage Path',
         sharedStorage: 'ffplayout работает внутри контейнера, используйте один и тот же корень хранилища для всех каналов!',
         timezone: 'Timezone',

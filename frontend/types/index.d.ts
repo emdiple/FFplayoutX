@@ -37,6 +37,8 @@ declare global {
         preview_url: string
         public: string
         playlists: string
+        advendor_base_url: string
+        is_advendor_nownext: boolean
         storage: string
         timezone?: string
     }

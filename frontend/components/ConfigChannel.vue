@@ -96,7 +96,47 @@
                     />
                 </label>
 
-                <label class="form-control w-full mt-5">
+                <label class="form-control w-full mt-8">
+                    <div class="label">
+                        <span class="label-text">{{ t('config.advendorBaseUrl') }}</span>
+                    </div>
+                    <input
+                        v-model="channel.advendor_base_url"
+                        type="text"
+                        name="advendor_base_url"
+                        class="input input-bordered w-full"
+                        @keyup="isChanged"
+                    />
+                </label>
+
+                <label class="form-control w-full mt-1">
+                    <div v-if="channel.advendor_base_url" class="label cursor-pointer flex gap-2 justify-start">
+                        <span class="label-text">{{ t('config.isAdvendorNowNext') }}</span>
+                        <input
+                            v-model="channel.is_advendor_nownext"
+                            type="checkbox"
+                            class="checkbox scale-75"
+                            :checked="channel.is_advendor_nownext || false"
+                            @change="isChanged"
+                        />
+                    </div>
+                </label>
+
+                <!-- <label class="form-control w-1/2 mt-1">
+                    <div v-if="channel.advendor_base_url" class="label">
+                        <span class="label-text">{{ t('config.advendorNowNextUrl') }}</span>
+                    </div>
+                    <input
+                        v-if="channel.advendor_base_url"
+                        v-model="channel.advendor_base_url"
+                        type="text"
+                        name="advendor_nownext_url"
+                        class="input input-bordered w-full"
+                        @keyup="isChanged"
+                    />
+                </label> -->
+
+                <label class="form-control w-full mt-6">
                     <div class="label">
                         <span class="label-text">{{ t('config.timezone') }}</span>
                     </div>
@@ -184,6 +224,7 @@ function newChannel() {
     channel.value.preview_url = `${window.location.protocol}//${window.location.host}/${channel.value.id}/live/stream.m3u8`
     channel.value.public = `${rmId(channel.value.public)}/${channel.value.id}`
     channel.value.playlists = `${rmId(channel.value.playlists)}/${channel.value.id}`
+    channel.value.advendor_base_url = `${rmId(channel.value.advendor_base_url)}/${channel.value.id}`
     channel.value.storage = `${rmId(channel.value.storage)}/${channel.value.id}`
     channel.value.timezone = dayjs.tz.guess()
 
