@@ -41,14 +41,22 @@
                     max-size="80"
                     size="20"
                 >
-                    <MediaBrowser :preview="setPreviewData" />
+                    <MediaBrowser
+                        v-if="playlistTable"
+                        :preview="setPreviewData"
+                        :switch-class="playlistTable?.classSwitcher"
+                    />
                 </pane>
                 <pane>
                     <PlaylistTable ref="playlistTable" :edit-item="editPlaylistItem" :preview="setPreviewData" />
                 </pane>
             </splitpanes>
             <div v-else class="h-full border border-b-2 border-my-gray rounded shadow">
-                <MediaBrowser :preview="setPreviewData" />
+                <MediaBrowser
+                    v-if="playlistTable"
+                    :preview="setPreviewData"
+                    :switch-class="playlistTable?.classSwitcher"
+                />
             </div>
         </div>
 
@@ -346,9 +354,9 @@ function closePlayer() {
 }
 
 function setPreviewData(path: string) {
-    const indicatorMatch = path.match(/^\[(.*?):\]/);
+    const indicatorMatch = path.match(/^\[(.*?):\]/)
     if (indicatorMatch) {
-        path = path.replace(indicatorMatch[0], ''); // Remove the indicator completely
+        path = path.replace(indicatorMatch[0], '') // Remove the indicator completely
     }
 
     let fullPath = path
@@ -401,10 +409,7 @@ function setPreviewData(path: string) {
     } else {
         isVideo.value = false
     }
-
-
 }
-
 
 function splitClip() {
     splitTimes.value = []
@@ -586,14 +591,27 @@ async function savePlaylist(save: boolean) {
             }),
         })
             .then((response: any) => {
+                // console.log('Raw response:', response)
+
+                const parentMsg = response.parent_msg
+                const childMsg = response.child_msg
+
                 playlistTable.value.classSwitcher()
-                indexStore.msgAlert('success', response, 2)
+
+                indexStore.msgAlert(
+                    'success',
+                    parentMsg,
+                    4,
+                    true,
+                    childMsg.startsWith('e:') ? 'error' : 'success',
+                    childMsg.startsWith('e:') ? childMsg.substring(2) : childMsg
+                )
             })
             .catch((e: any) => {
                 if (e.status === 409) {
                     indexStore.msgAlert('warning', e.data, 2)
                 } else {
-                    indexStore.msgAlert('error', e, 4)
+                    indexStore.msgAlert('error', e.message, 4)
                 }
             })
     }
