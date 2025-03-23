@@ -192,9 +192,7 @@ pub struct Channel {
     pub logs: PathBuf,
     pub public: PathBuf,
     pub playlists: PathBuf,
-    pub advendor_base_url: String,
-    pub is_advendor_nownext: bool,
-    pub advendor_nownext_route: String,
+    pub advendor_endpoint: String,
     pub storage: PathBuf,
     pub shared: bool,
     #[ts(type = "string")]
@@ -207,9 +205,7 @@ impl Channel {
             logs: PathBuf::from(config.logs.clone()),
             public: PathBuf::from(channel.public.clone()),
             playlists: PathBuf::from(channel.playlists.clone()),
-            advendor_base_url: channel.advendor_base_url.clone(),
-            is_advendor_nownext: channel.is_advendor_nownext,
-            advendor_nownext_route: channel.advendor_nownext_route.clone(),
+            advendor_endpoint: channel.advendor_endpoint.clone(),
             storage: PathBuf::from(channel.storage.clone()),
             shared: config.shared,
             timezone: channel.timezone,
@@ -636,27 +632,6 @@ impl PlayoutConfig {
         if !channel.logs.is_dir() {
             fs::create_dir_all(&channel.logs).await?;
         }
-
-        // it define the filler path in case of using abs of relative path
-        // let (filler, filler_path) = if config.storage_filler.starts_with(ABS_PATH_INDICATOR) {
-        //     let filler_sanitized_path = config
-        //         .storage_filler
-        //         .strip_prefix(ABS_PATH_INDICATOR)
-        //         .unwrap_or(&config.storage_filler);
-        //     let filler_sanitized_path: &str = if filler_sanitized_path.starts_with("/") {
-        //         filler_sanitized_path
-        //     } else {
-        //         &format!("/{}", filler_sanitized_path)
-        //     };
-        //     let abs_filler = &config.storage_filler;
-        //     (
-        //         String::from(abs_filler),
-        //         PathBuf::from(&filler_sanitized_path),
-        //     )
-        // } else {
-        //     let (filler_path, _, filler) = norm_abs_path(&channel.storage, &config.storage_filler)?;
-        //     (filler, filler_path)
-        // };
 
         let (filler, filler_path) =
             clean_raw_abs_path(&channel.storage, &config.storage_filler, ABS_PATH_INDICATOR)?;

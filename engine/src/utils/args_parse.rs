@@ -78,8 +78,8 @@ pub struct Args {
     #[clap(long, help_heading = Some("Initial Setup / Playlist"), help = "Path to playlist, or playlist root folder")]
     pub playlists: Option<String>,
 
-    #[clap(long, help_heading = Some("Initial Setup / Advendor"), help = "Base-Url to Advendor Micro-Service")]
-    pub advendor_base_url: Option<String>,
+    #[clap(long, help_heading = Some("Initial Setup / Advendor"), help = "Endpoint to Advendor Micro-Service")]
+    pub advendor_endpoint: Option<String>,
 
     #[clap(long, help_heading = Some("General"), help = "Add or update a global admin user")]
     pub user_set: bool,
@@ -258,11 +258,11 @@ pub async fn init_args(pool: &Pool<Sqlite>) -> Result<bool, ProcessError> {
                 .prompt()?;
         }
 
-        if let Some(adv) = args.advendor_base_url {
-            global.advendor_base_url = adv;
+        if let Some(adv) = args.advendor_endpoint {
+            global.advendor_endpoint = adv;
         } else {
-            global.advendor_base_url = Text::new("Advendor base-url:")
-                .with_default(&global.advendor_base_url)
+            global.advendor_endpoint = Text::new("Advendor Endpoint:")
+                .with_default(&global.advendor_endpoint)
                 .with_formatter(&clean_input)
                 .prompt()?;
         }
@@ -350,7 +350,7 @@ pub async fn init_args(pool: &Pool<Sqlite>) -> Result<bool, ProcessError> {
         let mut channel = handles::select_channel(pool, &1).await?;
         channel.public = global.public;
         channel.playlists = global.playlists;
-        channel.advendor_base_url = global.advendor_base_url;
+        channel.advendor_endpoint = global.advendor_endpoint;
         channel.storage = global.storage;
 
         let mut storage_path = PathBuf::from(channel.storage.clone());
