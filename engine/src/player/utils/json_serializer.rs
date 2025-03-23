@@ -16,6 +16,12 @@ use crate::{
     },
 };
 
+/// Structure of save-playlist route that contain self save-playlist api call resp(parent) and its inner api call to Advendor service(child)
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SavePlaylistResponse {
+    pub parent_msg: String,
+    pub child_msg: String,
+}
 /// This is our main playlist object, it holds all necessary information for the current day.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct JsonPlaylist {
