@@ -26,11 +26,7 @@
     </div>
 
     <div class="w-full h-[calc(100%-40px)] overflow-auto">
-        <div
-            v-for="folder in mediaStore.folderTree.folders"
-            :key="folder.uid"
-            class="flex px-2 py-[2px] bg-base-200"
-        >
+        <div v-for="folder in mediaStore.folderTree.folders" :key="folder.uid" class="flex px-2 py-[2px] bg-base-200">
             <button class="truncate" @click="mediaStore.getTree(`/${mediaStore.folderTree.source}/${folder.name}`)">
                 <i class="bi-folder-fill" />
                 {{ folder.name }}
@@ -43,9 +39,11 @@
                         :id="`file-${index}`"
                         :key="element.name"
                         class="w-full border-b border-t border-base-content/20"
-                        :class="{ 'grabbing cursor-grab': width > 739 && configStore.playout.processing.mode === 'playlist' }"
+                        :class="{
+                            'grabbing cursor-grab': width > 739 && configStore.playout.processing.mode === 'playlist',
+                        }"
                     >
-                        <td class="ps-2 py-1 w-[20px]" :class="{'timeHidden': configStore.playout.playlist.infinit}">
+                        <td class="ps-2 py-1 w-[20px]" :class="{ timeHidden: configStore.playout.playlist.infinit }">
                             <i v-if="mediaType(element.name) === 'audio'" class="bi-music-note-beamed" />
                             <i v-else-if="mediaType(element.name) === 'video'" class="bi-film" />
                             <i v-else-if="mediaType(element.name) === 'image'" class="bi-file-earmark-image" />
@@ -67,6 +65,11 @@
                         <td class="py-1 hidden">&nbsp;</td>
                         <td class="py-1 hidden">&nbsp;</td>
                         <td class="py-1 hidden">&nbsp;</td>
+                        <td :id="`button-${index}`" class="px-1 py-1 w-[30px] text-center leading-3">
+                            <button @click="addToPlaylist(index)">
+                                <i class="bi-plus-square-fill" />
+                            </button>
+                        </td>
                     </tr>
                 </template>
             </Sortable>
@@ -80,6 +83,11 @@ const { secToHMS, mediaType } = stringFormatter()
 const configStore = useConfig()
 const mediaStore = useMedia()
 const { i } = storeToRefs(useConfig())
+const playlistStore = usePlaylist()
+const playlistContainer = ref()
+
+const { processPlaylist, genUID } = playlistOperations()
+const {listDate } = storeToRefs(usePlaylist())
 
 const browserSortOptions = {
     group: { name: 'playlist', pull: 'clone', put: false },
@@ -87,8 +95,62 @@ const browserSortOptions = {
     sort: false,
 }
 
-defineProps({
+function addBG(event: any) {
+    const item = event.item
+    if (item) {
+        item.classList.add('!bg-fuchsia-900/30')
+    }
+}
+
+function removeBG(item: any) {
+    setTimeout(() => {
+        item?.classList?.remove('!bg-fuchsia-900/30')
+    }, 100)
+}
+
+function addToPlaylist(arg: number | any) {
+    const index = arg
+    const uid = genUID()
+
+    const storagePath = configStore.channels[configStore.i].storage
+    const sourcePath = `${storagePath}/${mediaStore.folderTree.source}/${mediaStore.folderTree.files[index].name}`.replace(
+        /\/[/]+/g,
+        '/'
+    )
+
+    const n = playlistStore.playlist.length
+    playlistStore.playlist.splice(n, 0, {
+        uid,
+        begin: 0,
+        source: sourcePath,
+        in: 0,
+        out: mediaStore.folderTree.files[index].duration || 10,
+        duration: mediaStore.folderTree.files[index].duration || 10,
+    })
+
+    processPlaylist(listDate.value, playlistStore.playlist, false)
+    prop.switchClass()
+
+    nextTick(() => {
+        const newNode = document.getElementById(`clip-${n}`)
+        if (newNode) {
+            addBG({ item: newNode })
+            removeBG(newNode)
+        }
+        if (n > playlistStore.playlist.length - 3 && playlistContainer.value) {
+            playlistContainer.value.scroll({ top: playlistContainer.value.scrollHeight, behavior: 'smooth' })
+        }
+    })
+}
+
+const prop = defineProps({
     preview: {
+        type: Function,
+        default() {
+            return ''
+        },
+    },
+    switchClass: {
         type: Function,
         default() {
             return ''
