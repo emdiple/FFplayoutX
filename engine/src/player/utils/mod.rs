@@ -43,7 +43,7 @@ use crate::utils::{
     logging::Target,
     time_machine::time_now,
 };
-pub use json_serializer::{read_json, JsonPlaylist};
+pub use json_serializer::{read_json, JsonPlaylist, SavePlaylistResponse};
 
 use crate::vec_strings;
 
