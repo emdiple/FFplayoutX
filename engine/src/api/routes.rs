@@ -50,7 +50,7 @@ use crate::{
         controller::ChannelController,
         utils::{
             get_data_map, get_date_range, import::import_file, sec_to_time, time_to_sec,
-            JsonPlaylist,
+            JsonPlaylist, SavePlaylistResponse,
         },
     },
     utils::{
@@ -59,6 +59,7 @@ use crate::{
         config::{get_config, PlayoutConfig, Template},
         control::{control_state, send_message, ControlParams, Process, ProcessCtl},
         errors::ServiceError,
+        logging::Target,
         mail::MailQueue,
         naive_date_time_from_str,
         playlist::{delete_playlist, generate_playlist, read_playlist, write_playlist},
@@ -443,10 +444,9 @@ async fn patch_channel(
 
         data.public = channel.public;
         data.playlists = channel.playlists;
-        data.advendor_base_url = channel.advendor_base_url;
+        data.advendor_endpoint = channel.advendor_endpoint;
         data.storage = channel.storage;
     }
-
     handles::update_channel(&pool, *id, data.clone()).await?;
     let new_config = get_config(&pool, *id).await?;
 
@@ -708,7 +708,6 @@ async fn get_playout_config(
         .await
         .ok_or_else(|| ServiceError::BadRequest(format!("Channel ({id}) not exists!")))?;
     let config = manager.config.lock().await.clone();
-
     Ok(web::Json(config))
 }
 
@@ -1174,60 +1173,60 @@ pub async fn save_playlist(
     let channel = config.channel.clone();
 
     let mut data = data.into_inner();
+
     for media in &mut data.program {
         let cloned_media_source = media.source.clone();
         media.source = storage.sanitized_file_path(&cloned_media_source);
     }
 
-    data = if channel.advendor_base_url.is_empty() || !channel.is_advendor_nownext {
-        data
-    } else if !channel.advendor_nownext_route.is_empty() {
-        let base_url = if channel.advendor_base_url.is_empty() {
-            return Err(ServiceError::BadRequest(
-                "Advendor endpoint is empty".to_string(),
-            ));
-        } else if !channel.advendor_base_url.starts_with("http://")
-            && !channel.advendor_base_url.starts_with("https://")
+    let mut advendor_resp: String = "Advendor service called success!".to_string();
+
+    if !channel.advendor_endpoint.is_empty() {
+        let endpoint_url = if !channel.advendor_endpoint.starts_with("http://")
+            && !channel.advendor_endpoint.starts_with("https://")
         {
-            format!("http://{}", channel.advendor_base_url)
+            format!("http://{}", channel.advendor_endpoint)
         } else {
-            channel.advendor_base_url.clone()
+            channel.advendor_endpoint.clone()
         };
 
-        let endpoint_url = format!(
-            "{}/{}",
-            base_url.trim_end_matches('/'),
-            channel.advendor_nownext_route.trim_start_matches('/')
-        );
-
         let client = reqwest::Client::new();
-        let nownext_response = client
-            .post(&endpoint_url)
-            .json(&data)
-            .send()
-            .await
-            .map_err(|e| {
-                ServiceError::BadRequest(format!("Failed to send nownext request: {}", e))
-            })?;
 
-        if !nownext_response.status().is_success() {
-            return Err(ServiceError::BadRequest(format!(
-                "Nownext service returned error: HTTP {}",
-                nownext_response.status()
-            )));
+        match client.post(&endpoint_url).json(&data).send().await {
+            Ok(response) if response.status().is_success() => match response.json().await {
+                Ok(parsed_data) => {
+                    data = parsed_data;
+                }
+                Err(e) => {
+                    let error = format!("e:Failed to parse response: {}", e);
+                    advendor_resp = error.clone();
+                    error!(target: Target::file_mail(), channel = *id; "[ADVENDOR] {}", error);
+                }
+            },
+            Ok(response) => {
+                let error = format!("e:Service returned error: HTTP {}", response.status());
+                advendor_resp = error.clone();
+                error!(target: Target::file_mail(), channel = *id;
+                    "[ADVENDOR] {}",
+                    error
+                );
+            }
+            Err(e) => {
+                let error = format!("e:Failed to send request to : {}", e);
+                advendor_resp = error.clone();
+                error!(target: Target::file_mail(), channel = *id; "[ADVENDOR] {}", error);
+            }
         }
-
-        nownext_response.json().await.map_err(|e| {
-            ServiceError::BadRequest(format!("Failed to parse nownext response: {}", e))
-        })?
-    } else {
-        return Err(ServiceError::BadRequest(
-            "Nownext route should not be empty".to_string(),
-        ));
-    };
+    }
 
     match write_playlist(&config, data).await {
-        Ok(res) => Ok(web::Json(res)),
+        Ok(main_resp) => {
+            let resp_msg = SavePlaylistResponse {
+                parent_msg: main_resp,
+                child_msg: advendor_resp,
+            };
+            Ok(web::Json(resp_msg))
+        }
         Err(e) => Err(e),
     }
 }
