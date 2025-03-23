@@ -83,58 +83,101 @@
                     />
                 </label>
 
-                <label class="form-control w-full mt-5">
-                    <div class="label">
-                        <span class="label-text">{{ t('config.storagePath') }}</span>
+                <div class="space-y-6 mt-8">
+                    <div class="flex flex-col gap-2">
+                        <label for="storage_type" class="text-sm font-medium">
+                            {{ t('config.storageType') }}
+                        </label>
+                        <select
+                            v-model="storage_type"
+                            id="storage_type"
+                            class="w-1/4 max-w-xs rounded-lg border border-gray-600 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-base-100"
+                            @change="isChanged"
+                        >
+                            <option value="Local">Local</option>
+                            <option value="S3">S3</option>
+                        </select>
                     </div>
-                    <input
-                        v-model="channel.storage"
-                        type="text"
-                        name="storage"
-                        class="input input-bordered w-full"
-                        @keyup="isChanged"
-                    />
-                </label>
 
-                <label class="form-control w-full mt-8">
-                    <div class="label">
-                        <span class="label-text">{{ t('config.advendorBaseUrl') }}</span>
+                    <div v-if="storage_type === 'Local'" class="flex flex-col gap-2 ml-5">
+                        <label for="local_path" class="text-sm font-medium text-gray-400">
+                            {{ t('config.localPath') }}
+                        </label>
+                        <input
+                            v-model="local_path"
+                            id="local_path"
+                            placeholder="Enter Local Path"
+                            class="w-full rounded-lg border border-gray-600 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-base-100"
+                            @keyup="isChanged"
+                        />
                     </div>
-                    <input
-                        v-model="channel.advendor_base_url"
-                        type="text"
-                        name="advendor_base_url"
-                        class="input input-bordered w-full"
-                        @keyup="isChanged"
-                    />
-                </label>
 
-                <div v-if="channel.advendor_base_url" class="flex items-center gap-4 mt-3 ml-4">
-                    <div class="flex items-center gap-4 w-full">
-                        <span class="label-text whitespace-nowrap">{{ t('config.isAdvendorNowNext') }}</span>
-                        <label class="form-control flex items-center gap-2">
+                    <div v-else-if="storage_type === 'S3'" class="space-y-4 ml-5">
+                        <div class="flex flex-col gap-2">
+                            <label for="s3_bucket" class="text-sm font-medium text-gray-400">
+                                {{ t('config.s3Bucket') }}
+                            </label>
                             <input
-                                v-model="channel.is_advendor_nownext"
-                                type="checkbox"
-                                class="checkbox checkbox-sm"
-                                :checked="channel.is_advendor_nownext || false"
-                                @change="isChanged"
+                                v-model="s3_bucket"
+                                id="s3_bucket"
+                                placeholder="Enter Bucket"
+                                class="w-1/2 rounded-lg border border-gray-600 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-base-100"
+                                @keyup="isChanged"
                             />
-                        </label>
-                        <label v-if="channel.is_advendor_nownext" class="form-control flex-1">
-                            <div class="label">
-                                <span class="label-text ml-10">{{ t('config.advendorNowNextRoute') }}</span>
-                                <input
-                                    v-model="channel.advendor_nownext_route"
-                                    type="text"
-                                    name="advendor_nownext_route"
-                                    class="input input-bordered w-full input-sm ml-4"
-                                    @keyup="isChanged"
-                                />
-                            </div>
-                        </label>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="s3_endpoint" class="text-sm font-medium text-gray-400">
+                                {{ t('config.s3Endpoint') }}
+                            </label>
+                            <input
+                                v-model="s3_endpoint"
+                                id="s3_endpoint"
+                                placeholder="Enter Endpoint-Url:Port"
+                                class="w-1/2 rounded-lg border border-gray-600 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-base-100"
+                                @keyup="isChanged"
+                            />
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="s3_accesskey" class="text-sm font-medium text-gray-400">
+                                {{ t('config.s3AccessKey') }}
+                            </label>
+                            <input
+                                v-model="s3_accesskey"
+                                id="s3_accesskey"
+                                placeholder="Enter Access Key"
+                                class="w-1/2 rounded-lg border border-gray-600 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-base-100"
+                                @keyup="isChanged"
+                            />
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label for="s3_secretkey" class="text-sm font-medium text-gray-400">
+                                {{ t('config.s3SecretKey') }}
+                            </label>
+                            <input
+                                v-model="s3_secretkey"
+                                id="s3_secretkey"
+                                placeholder="Enter Secret Key"
+                                class="w-1/2 rounded-lg border border-gray-600 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-base-100"
+                                @keyup="isChanged"
+                            />
+                        </div>
                     </div>
                 </div>
+                <label class="form-control w-full mt-8">
+                    <div class="label">
+                        <span class="label-text">{{ t('config.advendorEndpoint') }}</span>
+                    </div>
+                    <input
+                        v-model="channel.advendor_endpoint"
+                        type="text"
+                        name="advendor_endpoint"
+                        class="input input-bordered w-full"
+                        @keyup="isChanged"
+                    />
+                </label>
 
                 <label class="form-control w-full mt-6">
                     <div class="label">
@@ -183,6 +226,15 @@
 import dayjs from 'dayjs'
 import { cloneDeep, isEqual } from 'lodash-es'
 
+const S3_INDICATOR = 's3://'
+
+const storage_type = ref('Local')
+const local_path = ref('')
+const s3_bucket = ref('')
+const s3_endpoint = ref('')
+const s3_accesskey = ref('')
+const s3_secretkey = ref('')
+
 const { t } = useI18n()
 
 const authStore = useAuth()
@@ -195,9 +247,24 @@ const saved = ref(true)
 const channel = ref({} as Channel)
 const channelOrig = ref({} as Channel)
 
+
 onMounted(() => {
     channel.value = cloneDeep(configStore.channels[i.value])
     channelOrig.value = cloneDeep(configStore.channels[i.value])
+
+    // Set storage type based on existing data
+    if (channel.value.storage.startsWith(S3_INDICATOR)) {
+        storage_type.value = 'S3'
+        const [, bucket, endpoint, accessKey, secretKey] =
+            channel.value.storage.match(/^s3:\/\/([^\/]+)\/:([^\/]+)\/:([^\/]+)\/:([^\/]+)$/) || []
+        s3_bucket.value = bucket || ''
+        s3_endpoint.value = endpoint || ''
+        s3_accesskey.value = accessKey || ''
+        s3_secretkey.value = secretKey || ''
+    } else {
+        storage_type.value = 'Local'
+        local_path.value = channel.value.storage || ''
+    }
 })
 
 watch([i], () => {
@@ -205,6 +272,17 @@ watch([i], () => {
         channel.value = cloneDeep(configStore.channels[i.value])
     }
 })
+
+watch(
+    [storage_type, s3_bucket, s3_endpoint, s3_accesskey, s3_secretkey, local_path],
+    ([newStorageType, newBucket, newEndpoint, newAccessKey, newSecretKey, newLocalPath]) => {
+        if (newStorageType === 'S3') {
+            channel.value.storage = `${S3_INDICATOR}${newBucket}/:${newEndpoint}/:${newAccessKey}/:${newSecretKey}`
+        } else {
+            channel.value.storage = newLocalPath
+        }
+    }
+)
 
 function isChanged() {
     if (isEqual(channel.value, channelOrig.value)) {
@@ -224,9 +302,19 @@ function newChannel() {
     channel.value.preview_url = `${window.location.protocol}//${window.location.host}/${channel.value.id}/live/stream.m3u8`
     channel.value.public = `${rmId(channel.value.public)}/${channel.value.id}`
     channel.value.playlists = `${rmId(channel.value.playlists)}/${channel.value.id}`
-    channel.value.advendor_base_url = `${rmId(channel.value.advendor_base_url)}/${channel.value.id}`
-    channel.value.storage = `${rmId(channel.value.storage)}/${channel.value.id}`
+    channel.value.advendor_endpoint = `${rmId(channel.value.advendor_endpoint)}`
     channel.value.timezone = dayjs.tz.guess()
+    channel.value.storage = ''
+    if (storage_type.value === 'S3') {
+        s3_bucket.value = ''
+        s3_endpoint.value = ''
+        s3_accesskey.value = ''
+        s3_secretkey.value = ''
+
+        storage_type.value = 'Local'
+    } else if (storage_type.value === 'Local') {
+        local_path.value = ''
+    }
 
     saved.value = false
 }
@@ -315,6 +403,26 @@ async function addUpdateChannel() {
 
 function resetChannel() {
     channel.value = cloneDeep(configStore.channels[i.value])
+    if (channel.value.storage.startsWith(S3_INDICATOR)) {
+        storage_type.value = 'S3'
+        const [, bucket, endpoint, accessKey, secretKey] =
+            channel.value.storage.match(/^s3:\/\/([^\/]+)\/:([^\/]+)\/:([^\/]+)\/:([^\/]+)$/) || []
+        s3_bucket.value = bucket || ''
+        s3_endpoint.value = endpoint || ''
+        s3_accesskey.value = accessKey || ''
+        s3_secretkey.value = secretKey || ''
+
+        local_path.value = ''
+    } else {
+        storage_type.value = 'Local'
+        local_path.value = channel.value.storage || ''
+
+        s3_bucket.value = ''
+        s3_endpoint.value = ''
+        s3_accesskey.value = ''
+        s3_secretkey.value = ''
+    }
+
     saved.value = true
 }
 
