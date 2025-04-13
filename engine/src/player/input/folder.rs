@@ -71,7 +71,7 @@ impl FolderSource {
         if media_list.is_empty() {
             error!(target: Target::file_mail(), channel = id;
                 "no playable files found under: <b><magenta>{:?}</></b>",
-                path_list // to-do : fix this! that shows the s3 config!
+                path_list // todo : fix this! that shows the s3 config!
             );
         }
 

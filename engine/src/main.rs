@@ -53,7 +53,7 @@ fn thread_counter() -> usize {
 
 #[tokio::main]
 async fn main() -> Result<(), ProcessError> {
-    let shared_duration = Arc::new(MediaMap::create(3000)); // to-do : implement it in frontend as input
+    let shared_duration = Arc::new(MediaMap::create(3000)); // todo : implement it in frontend as input
 
     let mail_queues = Arc::new(Mutex::new(vec![]));
     let pool = db_pool().await?;

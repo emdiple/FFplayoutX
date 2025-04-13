@@ -27,7 +27,7 @@ pub async fn output(config: &PlayoutConfig, log_format: &str) -> Result<Child, S
         "-i",
         "pipe:0",
         "-window_title",
-        "ffplayout"
+        "ffplayoutX"
     ]);
 
     if let Some(mut cmd) = config.output.output_cmd.clone() {

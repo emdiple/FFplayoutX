@@ -20,11 +20,11 @@ pub struct Overlay {
     pub scale: String,
     pub rotation: f64,
     pub opacity: f64,
-    #[serde(default = "default_true")]
+    #[serde(default = "default_false")]
     pub is_looped: bool,
 }
 
-fn default_true() -> bool {
+fn default_false() -> bool {
     false
 }
 
@@ -48,6 +48,7 @@ pub fn enhanced_overlay(chain: &mut Filters, node: &Media) {
                     } else {
                         format!(",setpts=PTS+{}/TB", start_time,)
                     };
+
                     //setpts=PTS-STARTPTS+{}/TB
                     //:loop={play_loop}
                     let movie = format!(
@@ -68,13 +69,13 @@ pub fn enhanced_overlay(chain: &mut Filters, node: &Media) {
                         "overlay={}:enable='lte(t, {:.2})'",
                         overlay.position, end_time
                     );
+                    chain.add(&overlay_filter, 0, Video);
+
                     // let overlay_filter = format!(
                     //     "overlay={}:enable='between(t,{}, {})'",
                     //     overlay.position, start_time, end_time
                     // );
                     // let overlay_filter = format!("overlay={}", overlay.position);
-
-                    chain.add(&overlay_filter, 0, Video);
                 }
             }
         }

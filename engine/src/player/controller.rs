@@ -431,7 +431,7 @@ async fn find_m3u8_files(path: &Path) -> io::Result<Vec<String>> {
 
 /// Check if segment is in playlist, if not, delete it.
 async fn delete_old_segments<P: AsRef<Path> + Clone + std::fmt::Debug>(
-    // to-do: should be backend_storage compatible!
+    // todo: should be backend_storage compatible!
     path: P,
     pl_segments: &[String],
 ) -> io::Result<()> {

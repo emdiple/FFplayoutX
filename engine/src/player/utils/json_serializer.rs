@@ -198,7 +198,7 @@ pub async fn read_json(
             m.key = m.source.clone();
             let interpreted_source = storage.interpreted_file_path(&source_clone);
             m.source = storage.fetch_file_path(&interpreted_source).await.unwrap();
-        } // to-do : should take care about it!
+        } // todo : should take care about it!
 
         // catch empty program list
         if playlist.program.is_empty() {

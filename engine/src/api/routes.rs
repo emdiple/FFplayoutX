@@ -1624,7 +1624,7 @@ async fn get_public(
     expr = "user.channels.contains(&*id) || role.has_authority(&Role::GlobalAdmin)"
 )]
 async fn import_playlist(
-    // to-do : check this one!
+    // todo : check this one!
     id: web::Path<i32>,
     payload: Multipart,
     obj: web::Query<ImportObj>,

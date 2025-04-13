@@ -610,7 +610,7 @@ impl CurrentProgram {
                     filler_media.out = duration;
                 }
 
-                node.source = filler_media.source; // to-do : single filler file!
+                node.source = filler_media.source; // todo : single filler file!
                 node.seek = 0.0;
                 node.out = filler_media.out;
                 node.duration = filler_media.duration;
@@ -691,7 +691,7 @@ impl CurrentProgram {
             );
         }
 
-        node.add_filter(&self.config, &self.manager.filter_chain.clone()) // to-do : for fillter announcement
+        node.add_filter(&self.config, &self.manager.filter_chain.clone()) // todo : for fillter announcement
             .await;
 
         trace!(

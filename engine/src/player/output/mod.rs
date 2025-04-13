@@ -127,6 +127,8 @@ async fn play(
             fmt_cmd(&dec_cmd)
         );
 
+        // println!("\ncmd:{:?}", dec_cmd); // DEBUG
+
         // create ffmpeg decoder instance, for reading the input files
         let mut dec_proc = Command::new("ffmpeg")
             .args(dec_cmd)

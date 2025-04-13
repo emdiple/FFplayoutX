@@ -164,7 +164,7 @@ pub async fn get_data_map(manager: &ChannelManager) -> Map<String, Value> {
         .await
         .clone()
         .unwrap_or_else(Media::default);
-    media.source = media.key.clone(); // to-do : check it later!
+    media.source = media.key.clone(); // todo : check it later!
 
     let channel = manager.channel.lock().await.clone();
     let config = manager.config.lock().await.processing.clone();
@@ -420,7 +420,7 @@ pub fn fps_calc(r_frame_rate: &str, default: f64) -> f64 {
 }
 
 pub async fn json_reader(path: &PathBuf) -> Result<JsonPlaylist, Error> {
-    // to-do : checkout the performance of the new implemented method!
+    // todo : checkout the performance of the new implemented method!
     let mut f = File::options().read(true).write(false).open(path).await?;
     let mut contents = String::new();
     f.read_to_string(&mut contents).await?;
@@ -814,7 +814,7 @@ pub fn gen_dummy(config: &PlayoutConfig, duration: f64) -> (String, Vec<String>)
 // }
 
 pub fn is_remote(path: &str) -> bool {
-    // to-do : maybe needed to be more responsive to the storage type for example get the remote pattern of a specific storage type like "s3"
+    // todo : maybe needed to be more responsive to the storage type for example get the remote pattern of a specific storage type like "s3"
     Regex::new(r"^(https?|rtmps?|rts?p|udp|tcp|srt)://.*")
         .unwrap()
         .is_match(&path.to_lowercase())
