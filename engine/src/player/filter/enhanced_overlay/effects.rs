@@ -164,8 +164,9 @@ impl AddTextArgs {
 
 impl Effector for AddTextArgs {
     fn baker(&self, start: f64, end: f64) -> Option<String> {
+        let text = self.text.clone();
         if self.visible_len.is_some() {
-            let uppercase_text = self.text.to_uppercase(); // todo: Handle this latter to accept both uppercase and lowecase chars
+            let uppercase_text = text.to_uppercase(); // todo: Handle this latter to accept both uppercase and lowecase chars
             let mut txt_filters = Vec::new();
             let mut current_pos_x = 0.0;
 
@@ -201,7 +202,7 @@ impl Effector for AddTextArgs {
                 .join(",");
             Some(txt_filter)
         } else {
-            self.text_preset(&self.text.to_uppercase(), &self.position, start, end)
+            self.text_preset(&text, &self.position, start, end)
             // todo: Handle this latter to accept both uppercase and lowecase chars
         }
     }
