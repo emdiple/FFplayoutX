@@ -1,4 +1,4 @@
-**FFplayoutX**
+**FFplayout**<span style="color:darkred">X</span>
 ================
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -11,15 +11,11 @@ This is a community-driven fork of the original [ffplayout](https://github.com/f
 
 ### New-Features
 
-*   **S3 Storage Support:** Input media from S3 compatible services like AWS S3, MinIO, and more.
-*   **Schema for S3 Input:** Specify S3 media using a URL format like:
-    `s3://<bucket_name>/:<endpoint_url>/:<access_key>/:<secret_key>`.
-      - **`{bucket_name}`**: The name of the S3 bucket (e.g., `my-media-bucket`).  
-      - **`{endpoint_url}`**: The S3 service endpoint URL (e.g., `s3.amazonaws.com` for AWS S3, `minio.example.com:9000` for MinIO).  
-      - **`{access_key}`**: Your S3 access key ID (e.g., `AKIAIOSFODNN7EXAMPLE`).  
-      - **`{secret_key}`**: Your S3 secret access key (e.g., `wJalrXUtnFEMI`).
-      - **Example**: s3://my-media-bucket/:s3.amazonaws.com/:AKIAIOSFODNN7EXAMPLE/:wJalrXUtnFEMI
-*   **Performance Improvement:** Media duration caching speeds up ffplayout by storing durations in memory.
+- **Custom Ads and Overlays with Advendor Integration:** You can now integrate your custom ads and overlays using a third-party service called [Advendor](https://github.com/emdiple/Advendor). It connects to FFPlayout via a configurable endpoint defined in the settings panel.
+- **S3 Storage Support:** Input media from S3 compatible services like AWS S3, MinIO, and more. 
+    *   (S3 configuration can be set directly via the configuration panel, allowing for separate and secure management of your S3 credentials.)
+- **Performance Improvement:** Media duration caching speeds up ffplayout by storing durations in memory.
+
 -----------------------------------------------------------------------
 <br />
 
